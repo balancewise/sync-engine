@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "paths": {
+        "@/*": ["./*"]
+      },
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "lib": ["ES2020", "dom"]
+    }
+  }
+  

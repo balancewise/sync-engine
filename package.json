@@ -1,0 +1,23 @@
+{
+  "name": "sync-engine",
+  "version": "1.0.0",
+  "description": "A sync engine to make the app to work completely offline first",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com:balancewise/sync-engine"
+  },
+  "keywords": [
+    "sync-engine",
+    "local-first",
+    "offline-first"
+  ],
+  "author": "Balancewise",
+  "dependencies": {
+    "fake-indexeddb": "^6.0.0",
+    "tsx": "^4.19.2"
+  }
+}
