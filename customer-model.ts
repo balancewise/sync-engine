@@ -2,23 +2,18 @@ import { ClientModel, Property } from "./decorator";
 import { Model } from "./model";
 import { UpdateOperation } from "./operation";
 
-@ClientModel('Invoice')
-class Invoice extends Model {
-    @Property({ type: 'number' })
-    amount!: number;
-
+@ClientModel('Customer')
+class Customer extends Model {
     @Property({ type: 'string' })
-    status!: string;
+    name!: string;
 
     constructor(id: string) {
         super(id);
-        this.amount = 0;
-        this.status = 'pending';
+        this.name = '';
     }
 
-    initialize(amount: number, status: string) {
-        this.amount = amount;
-        this.status = status;
+    initialize(name: string) {
+        this.name = name;
         return this;
     }
 
@@ -27,7 +22,7 @@ class Invoice extends Model {
         if (Object.keys(changes).length > 0) {
             const transaction = new UpdateOperation(
                 this.id,
-                'Invoice',
+                'Customer',
                 changes
             );
             this.markChanged();
@@ -37,10 +32,9 @@ class Invoice extends Model {
 
     protected getChanges(): Record<string, any> {
         return {
-            amount: this.amount,
-            status: this.status
-        }
+            name: this.name
+        };
     }
 }
 
-export { Invoice };
+export { Customer };

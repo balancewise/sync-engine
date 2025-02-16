@@ -1,12 +1,15 @@
 import "fake-indexeddb/auto";
 import { ModelRegistry } from "./model-registry";
 import { ObjectStore, FullObjectStore, PartialObjectStore } from "./object-store";
-
+import { SchemaHasher } from "./hash";
 class StoreManager {
+    private dbName!: string;
     private stores = new Map<string, ObjectStore>();
 
     async initialize() {
         const models = ModelRegistry.getModels();
+        this.dbName = `db-${await SchemaHasher.generateDatabaseHash(models.map(
+            model => ModelRegistry.getModelMetadata(model)))}`;
         for (const model of models) {
             let store: ObjectStore;
 
@@ -26,7 +29,7 @@ class StoreManager {
     }
 
     private createDatabase(store: ObjectStore) {
-        const dbName = store.getDatabaseName();
+        const dbName = this.dbName;
         const request = indexedDB.open(dbName, 1);
 
         request.onupgradeneeded = (event) => {
