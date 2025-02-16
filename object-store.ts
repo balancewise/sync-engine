@@ -1,56 +1,30 @@
 import { ModelMetadata } from "./model-registry";
-
-const generateStoreHash = async (modelName: string, properties: string[], schemaVersion: number): Promise<string> => {
-    const hashContent = `${modelName}-${properties.join(',')}-${schemaVersion}`;
-    const encoder = new TextEncoder();
-    const data = encoder.encode(hashContent);
-    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
+import { SchemaHasher } from "./hash";
 
 abstract class ObjectStore {
-    protected dbName: string = '';
     protected storeName: string = ''; 
     protected isInitialized: boolean = false;
 
     constructor(protected model: ModelMetadata) {}
 
     protected async initializeStore() {
-        const properties = Object.keys(this.model.properties);
-        this.storeName = await generateStoreHash(
-            this.model.name,
-            properties,
-            this.model.schemaVersion
+        this.storeName = await SchemaHasher.generateStoreHash(
+            this.model
         );
     }
 
     abstract createStore(db: IDBDatabase): void;
-    abstract getDatabaseName(): string;
     abstract initialize(): Promise<void>;
 }
 
 class FullObjectStore extends ObjectStore {
     constructor(model: ModelMetadata) {
         super(model);
-        console.log("FullObjectStore constructor", model);
     }
 
     async initialize() {
-        this.dbName = await generateStoreHash(
-            this.model.name,
-            Object.keys(this.model.properties),
-            this.model.schemaVersion
-        );
        await this.initializeStore();
         this.isInitialized = true;
-    }
-
-    getDatabaseName() {
-        if (!this.isInitialized) {
-            throw new Error("Store not initialized");
-        }
-        return this.dbName;
     }
 
     createStore(db: IDBDatabase) {
@@ -81,13 +55,9 @@ class PartialObjectStore extends ObjectStore {
         super(model);
     }
 
-    getDatabaseName() {
-        return this.partialDbName;
-    }
-
     async initialize() {
         this.initializeStore();
-        this.partialDbName = `${this.storeName}_partial`;
+        this.storeName = `${this.storeName}_partial`;
         this.isInitialized = true;
     }
 
@@ -104,14 +74,6 @@ class PartialObjectStore extends ObjectStore {
                 keyPath: 'indexKey'
             });
         }
-    }
-
-    async initializeDB() {
-        this.dbName = await generateStoreHash(
-            this.model.name,
-            Object.keys(this.model.properties),
-            this.model.schemaVersion
-        );
     }
 }
 
